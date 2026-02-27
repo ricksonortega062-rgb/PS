@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParkSmart — Smart Parking Management</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     AUTH PAGE
+════════════════════════════════════════ -->
+<div id="page-auth" class="module-page active">
+  <div class="auth-page">
+
+    <!-- LOGIN -->
+    <div id="auth-login" class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🅿️</div>
+        <h2>Park<span style="color:var(--primary)">Smart</span></h2>
+        <p>Sign in to your account</p>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="login-email" type="email" class="form-control" placeholder="admin@parksmart.ph" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="login-pass" type="password" class="form-control" placeholder="••••••••" />
+        </div>
+        <div class="flex-between mb-4" style="font-size:13px;">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" /> Remember me</label>
+          <a href="#" class="auth-link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" style="justify-content:center;">Sign In →</button>
+        <button type="button" id="demo-btn" class="btn btn-secondary w-full" style="justify-content:center;margin-top:10px;">🚀 Use Demo Credentials</button>
+      </form>
+      <p class="text-center text-sm" style="margin-top:18px;color:var(--text-muted);">
+        No account? <a href="#" class="auth-link" onclick="showAuth('signup')">Create one</a>
+      </p>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="auth-signup" class="auth-card hidden">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🅿️</div>
+        <h2>Park<span style="color:var(--primary)">Smart</span></h2>
+        <p>Create your account</p>
+      </div>
+      <form id="signup-form">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-control" placeholder="Juan" /></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-control" placeholder="Dela Cruz" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" placeholder="juan@example.com" /></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-control" placeholder="Min 8 characters" /></div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-control"><option>Admin</option><option>Operator</option><option>Viewer</option></select>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" style="justify-content:center;">Create Account →</button>
+      </form>
+      <p class="text-center text-sm" style="margin-top:16px;color:var(--text-muted);">
+        Already have one? <a href="#" class="auth-link" onclick="showAuth('login')">Sign in</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MAIN APP (hidden until login)
+════════════════════════════════════════ -->
+<div class="page-wrapper" style="display:none;">
+
+  <!-- TOP NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="#">
+      <div class="brand-icon">P</div>
+      <span class="brand-name">Park<span>Smart</span></span>
+    </a>
+
+    <div class="navbar-nav">
+      <button class="nav-link" data-page="dashboard">Home</button>
+      <button class="nav-link" data-page="scanner">Scanner</button>
+      <button class="nav-link active" data-page="parking-lots">Parking Logs</button>
+      <button class="nav-link" data-page="reservations">Reservations</button>
+      <button class="nav-link" data-page="about">About</button>
+      <button class="nav-link" data-page="profile">Login/Signup</button>
+    </div>
+
+    <div class="navbar-right">
+      <div class="search-bar">
+        <span style="color:var(--text-muted);font-size:13px;">🔍</span>
+        <input type="text" placeholder="Search..." id="global-search" />
+      </div>
+      <div class="nav-icon-btn" onclick="showToast('3 new notifications','info')">
+        🔔<span class="dot">3</span>
+      </div>
+      <button class="btn-nav-cta" onclick="showToast('Redirecting to Apply Now...','info')">Apply Now!</button>
+      <div class="nav-avatar" data-page="profile" onclick="$('[data-page=profile]').first().click()">RO</div>
+    </div>
+  </nav>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="module-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle">Welcome back, Rickson! Here's what's happening today.</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary btn-sm">📥 Export</button>
+          <button class="btn btn-primary btn-sm" data-modal="new-reservation">+ New Reservation</button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon red">🚗</div><div><div class="stat-value">248</div><div class="stat-label">Vehicles Today</div><div class="stat-change up">↑ 12% vs yesterday</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">87</div><div class="stat-label">Available Slots</div><div class="stat-change up">↑ 5 freed up</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">📅</div><div><div class="stat-value">34</div><div class="stat-label">Reservations</div><div class="stat-change down">↓ 3 cancellations</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">💰</div><div><div class="stat-value">₱12,840</div><div class="stat-label">Revenue Today</div><div class="stat-change up">↑ 8%</div></div></div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📊 Weekly Traffic</span>
+            <select class="form-control" style="width:auto;padding:5px 10px;font-size:12px;"><option>This Week</option><option>Last Week</option></select>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart">
+              <div class="bar-wrap"><div class="bar" data-h="60" style="height:0%"></div><div class="bar-lbl">Mon</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="82" style="height:0%;background:var(--accent)"></div><div class="bar-lbl">Tue</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="48" style="height:0%"></div><div class="bar-lbl">Wed</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="91" style="height:0%;background:#16a34a"></div><div class="bar-lbl">Thu</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="74" style="height:0%"></div><div class="bar-lbl">Fri</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="56" style="height:0%;background:#d97706"></div><div class="bar-lbl">Sat</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="33" style="height:0%"></div><div class="bar-lbl">Sun</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">🅿️ Lot Occupancy</span><span class="live-badge">LIVE</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot A — Main</span><span>72 / 100 <span class="text-danger fw-600">72%</span></span></div><div class="occ-bar"><div class="occ-fill" data-pct="72" style="width:72%;background:var(--danger)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot B — Annex</span><span>45 / 80 <span class="text-muted fw-600">56%</span></span></div><div class="occ-bar"><div class="occ-fill" data-pct="56" style="width:56%;background:var(--warning)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot C — Rooftop</span><span>28 / 60 <span class="text-success fw-600">47%</span></span></div><div class="occ-bar"><div class="occ-fill" data-pct="47" style="width:47%;background:var(--success)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot D — Underground</span><span>18 / 44 <span class="text-success fw-600">41%</span></span></div><div class="occ-bar"><div class="occ-fill" data-pct="41" style="width:41%;background:var(--success)"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">🕐 Recent Activity</span><button class="btn btn-secondary btn-sm" data-page="parking-logs" onclick="$('[data-page=parking-logs]').first().click()">View All Logs</button></div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Plate No.</th><th>Lot</th><th>Slot</th><th>Time In</th><th>Time Out</th><th>Duration</th><th>Status</th><th>Fee</th></tr></thead>
+            <tbody>
+              <tr><td><strong>ABC 1234</strong></td><td>Lot A</td><td>A-12</td><td>08:32 AM</td><td>10:45 AM</td><td>2h 13m</td><td><span class="badge badge-muted">Done</span></td><td>₱66</td></tr>
+              <tr><td><strong>XYZ 5678</strong></td><td>Lot B</td><td>B-05</td><td>09:15 AM</td><td>—</td><td>Active</td><td><span class="badge badge-success">Parked</span></td><td>—</td></tr>
+              <tr><td><strong>DEF 9012</strong></td><td>Lot A</td><td>A-07</td><td>10:00 AM</td><td>12:30 PM</td><td>2h 30m</td><td><span class="badge badge-muted">Done</span></td><td>₱75</td></tr>
+              <tr><td><strong>GHI 3456</strong></td><td>Lot C</td><td>C-22</td><td>11:05 AM</td><td>—</td><td>Active</td><td><span class="badge badge-success">Parked</span></td><td>—</td></tr>
+              <tr><td><strong>JKL 7890</strong></td><td>Lot B</td><td>B-18</td><td>11:45 AM</td><td>—</td><td>Active</td><td><span class="badge badge-warning">Reserved</span></td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCANNER ══ -->
+    <div id="page-scanner" class="module-page">
+      <div class="page-header">
+        <div><div class="page-title">QR Scanner</div><div class="page-subtitle">Scan vehicle QR codes to check in or check out</div></div>
+        <span class="live-badge">Scanner Ready</span>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-title">📱 Scan QR Code</span></div>
+          <div class="card-body text-center">
+            <div class="qr-frame">
+              <div class="qr-c tl"></div><div class="qr-c tr"></div>
+              <div class="qr-c bl"></div><div class="qr-c br"></div>
+              <div class="scan-beam"></div>
+              <span style="font-size:70px;opacity:0.15;">⬛</span>
+            </div>
+            <p class="text-muted text-sm mb-4">Position the QR code within the frame<br>or click below to simulate a scan</p>
+            <button id="scan-btn" class="btn btn-primary" style="min-width:180px;justify-content:center;">📷 Scan QR Code</button>
+
+            <div id="scan-result" class="hidden" style="margin-top:18px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:left;">
+              <div class="text-xs text-muted fw-600" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Scanned Vehicle</div>
+              <div class="form-row">
+                <div><div class="text-xs text-muted">Plate No.</div><div style="font-size:20px;font-weight:700;font-family:monospace;" id="scanned-plate">—</div></div>
+                <div><div class="text-xs text-muted">Lot</div><div class="fw-600">Lot A</div></div>
+                <div><div class="text-xs text-muted">Time In</div><div class="fw-600">10:32 AM</div></div>
+                <div><div class="text-xs text-muted">Slot</div><div class="fw-600">A-07</div></div>
+              </div>
+              <div class="flex gap-2" style="margin-top:14px;">
+                <button class="btn btn-success w-full" style="justify-content:center;" onclick="showToast('Vehicle checked in!','success')">✅ Check In</button>
+                <button class="btn btn-danger w-full" style="justify-content:center;" onclick="showToast('Vehicle checked out!','info')">🚪 Check Out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">📋 Recent Scans</span></div>
+          <div class="table-wrapper">
+            <table><thead><tr><th>Time</th><th>Plate</th><th>Action</th><th>Lot</th></tr></thead>
+            <tbody>
+              <tr><td>11:45 AM</td><td><strong>ABC 1234</strong></td><td><span class="badge badge-success">Check In</span></td><td>Lot A</td></tr>
+              <tr><td>11:20 AM</td><td><strong>XYZ 5678</strong></td><td><span class="badge badge-muted">Check Out</span></td><td>Lot B</td></tr>
+              <tr><td>10:55 AM</td><td><strong>DEF 9012</strong></td><td><span class="badge badge-success">Check In</span></td><td>Lot A</td></tr>
+              <tr><td>10:30 AM</td><td><strong>GHI 3456</strong></td><td><span class="badge badge-muted">Check Out</span></td><td>Lot C</td></tr>
+              <tr><td>09:15 AM</td><td><strong>JKL 7890</strong></td><td><span class="badge badge-success">Check In</span></td><td>Lot B</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PARKING LOTS ══ -->
+    <div id="page-parking-lots" class="module-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Parking Lots</div>
+          <div class="page-subtitle">Manage all your parking locations</div>
+        </div>
+        <div class="flex gap-2">
+          <div class="search-bar" style="width:200px;">
+            <span style="color:var(--text-muted);font-size:13px;">🔍</span>
+            <input type="text" placeholder="Search lots..." id="lots-search" />
+          </div>
+          <button class="btn btn-primary" data-modal="add-lot">+ Add Lot</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🅿️ All Parking Lots</span>
+          <span class="badge badge-info">4 Active</span>
+        </div>
+        <div id="lots-list">
+          <!-- Lot A -->
+          <div class="lot-item">
+            <div class="lot-avatar">🚗</div>
+            <div class="lot-info">
+              <div class="lot-name">Parking Lot — 00001</div>
+              <div class="lot-detail">📍 123 Rizal Ave, Quezon City<br>🚘 72/100 occupied · ₱30/hr · Open 6AM–10PM</div>
+            </div>
+            <div class="lot-actions">
+              <button class="btn btn-outline btn-sm edit-lot-btn">Edit</button>
+              <button class="btn btn-primary btn-sm" data-modal="add-hours">Add Hours</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Lot closed','warning')">Close</button>
+            </div>
+          </div>
+          <!-- Lot B -->
+          <div class="lot-item">
+            <div class="lot-avatar">🚗</div>
+            <div class="lot-info">
+              <div class="lot-name">Parking Lot — 00002</div>
+              <div class="lot-detail">📍 45 Commonwealth Ave, Quezon City<br>🚘 45/80 occupied · ₱25/hr · Open 6AM–11PM</div>
+            </div>
+            <div class="lot-actions">
+              <button class="btn btn-outline btn-sm edit-lot-btn">Edit</button>
+              <button class="btn btn-primary btn-sm" data-modal="add-hours">Add Hours</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Lot closed','warning')">Close</button>
+            </div>
+          </div>
+          <!-- Lot C -->
+          <div class="lot-item">
+            <div class="lot-avatar">🚗</div>
+            <div class="lot-info">
+              <div class="lot-name">Parking Lot — 00003</div>
+              <div class="lot-detail">📍 7 Katipunan Ave, Quezon City<br>🚘 28/60 occupied · ₱20/hr · ⚠️ Maintenance</div>
+            </div>
+            <div class="lot-actions">
+              <button class="btn btn-outline btn-sm edit-lot-btn">Edit</button>
+              <button class="btn btn-primary btn-sm" data-modal="add-hours">Add Hours</button>
+              <button class="btn btn-success btn-sm" onclick="showToast('Lot opened','success')">Open</button>
+            </div>
+          </div>
+          <!-- Lot D -->
+          <div class="lot-item">
+            <div class="lot-avatar">🚗</div>
+            <div class="lot-info">
+              <div class="lot-name">Parking Lot — 00004</div>
+              <div class="lot-detail">📍 89 Timog Ave, Quezon City<br>🚘 18/44 occupied · ₱35/hr · Open 24hrs</div>
+            </div>
+            <div class="lot-actions">
+              <button class="btn btn-outline btn-sm edit-lot-btn">Edit</button>
+              <button class="btn btn-primary btn-sm" data-modal="add-hours">Add Hours</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Lot closed','warning')">Close</button>
+            </div>
+          </div>
+          <!-- Lot E -->
+          <div class="lot-item">
+            <div class="lot-avatar">🚗</div>
+            <div class="lot-info">
+              <div class="lot-name">Parking Lot — 00005</div>
+              <div class="lot-detail">📍 12 EDSA, Quezon City<br>🚘 30/50 occupied · ₱28/hr · Open 7AM–9PM</div>
+            </div>
+            <div class="lot-actions">
+              <button class="btn btn-outline btn-sm edit-lot-btn">Edit</button>
+              <button class="btn btn-primary btn-sm" data-modal="add-hours">Add Hours</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Lot closed','warning')">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RESERVATIONS ══ -->
+    <div id="page-reservations" class="module-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Reservations</div>
+          <div class="page-subtitle">Manage all parking reservations</div>
+        </div>
+        <button class="btn btn-primary" data-modal="new-reservation">+ New Reservation</button>
+      </div>
+
+      <div class="card-grid" style="grid-template-columns:2fr 1fr;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📅 All Reservations</span>
+            <div class="flex gap-2">
+              <select class="form-control" style="width:auto;padding:5px 10px;font-size:12px;"><option>All Status</option><option>Confirmed</option><option>Pending</option><option>Cancelled</option></select>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Exported!','success')">📥 Export</button>
+            </div>
+          </div>
+          <div id="res-list">
+            <div class="res-item">
+              <div class="res-info"><div class="res-id">#RES-1024 — ABC 1234</div><div class="res-detail">Lot A · Slot A-04 · Feb 28, 2026 · 09:00 AM</div></div>
+              <div class="res-actions">
+                <button class="btn btn-outline btn-sm" data-modal="edit-reservation">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="showToast('Reservation cancelled','warning')">Cancel</button>
+              </div>
+              <span class="badge badge-success">Confirmed</span>
+            </div>
+            <div class="res-item">
+              <div class="res-info"><div class="res-id">#RES-1023 — XYZ 5678</div><div class="res-detail">Lot B · Slot B-11 · Mar 1, 2026 · 02:30 PM</div></div>
+              <div class="res-actions">
+                <button class="btn btn-outline btn-sm" data-modal="edit-reservation">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="showToast('Reservation cancelled','warning')">Cancel</button>
+              </div>
+              <span class="badge badge-warning">Pending</span>
+            </div>
+            <div class="res-item">
+              <div class="res-info"><div class="res-id">#RES-1022 — DEF 9012</div><div class="res-detail">Lot A · Slot A-17 · Mar 2, 2026 · 11:00 AM</div></div>
+              <div class="res-actions">
+                <button class="btn btn-outline btn-sm" data-modal="edit-reservation">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="showToast('Reservation cancelled','warning')">Cancel</button>
+              </div>
+              <span class="badge badge-success">Confirmed</span>
+            </div>
+            <div class="res-item">
+              <div class="res-info"><div class="res-id">#RES-1021 — GHI 3456</div><div class="res-detail">Lot C · Slot C-08 · Mar 3, 2026 · 10:00 AM</div></div>
+              <div class="res-actions">
+                <button class="btn btn-success btn-sm" onclick="showToast('Reservation restored','success')">Restore</button>
+              </div>
+              <span class="badge badge-danger">Cancelled</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="card">
+          <div class="card-header">
+            <button class="btn btn-secondary btn-sm btn-icon" id="cal-prev">‹</button>
+            <span class="card-title" id="cal-title">February 2026</span>
+            <button class="btn btn-secondary btn-sm btn-icon" id="cal-next">›</button>
+          </div>
+          <div class="card-body">
+            <div id="calendar-grid" class="calendar-grid"></div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+              <div class="text-xs text-muted fw-600" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Today's Schedule</div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
+                <div class="flex-between"><span>ABC 1234 — Lot A</span><span class="text-success fw-600">09:00 AM</span></div>
+                <div class="flex-between"><span>DEF 9012 — Lot B</span><span class="text-warning fw-600">02:30 PM</span></div>
+                <div class="flex-between"><span>JKL 7890 — Lot C</span><span class="text-muted">07:00 PM</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ABOUT ══ -->
+    <div id="page-about" class="module-page">
+      <div class="about-hero">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+          <div style="width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;">🅿️</div>
+          <div>
+            <h1 style="font-size:26px;font-weight:700;">About ParkSmart</h1>
+            <p style="opacity:0.8;font-size:13px;">Seamless · Smart · Reliable</p>
+          </div>
+        </div>
+        <p style="opacity:0.85;font-size:13.5px;line-height:1.7;max-width:600px;">Smart Parking is an intelligent parking management system designed to help drivers find available parking spaces in real time.</p>
+      </div>
+
+      <div class="about-section-card">
+        <h2>🚗 About Smart Parking</h2>
+        <p>We are constantly trying to help ensure that parking has never been easier. Our system connects to sensors in parking spaces, letting cars and users know whether a space is available in real time, and has the infrastructure to ensure compliance — tackling one parking challenge at a time.</p>
+      </div>
+
+      <div class="about-section-card">
+        <h2>⚙️ What We Do</h2>
+        <p>Smart Parking combines real-time data, smart connectivity, and automation into one platform. Whether it's a shopping mall, office complex, residential area, or public parking facility, Smart Parking adapts to different environments and scales with your needs.</p>
+        <div class="feature-grid">
+          <div class="feature-box"><div class="feature-box-icon">🕐</div><div><div class="feature-box-title">Real-time Availability</div><div class="feature-box-desc">Live slot monitoring across all parking facilities</div></div></div>
+          <div class="feature-box"><div class="feature-box-icon">📱</div><div><div class="feature-box-title">Mobile Notifications</div><div class="feature-box-desc">Instant push and SMS alerts</div></div></div>
+          <div class="feature-box"><div class="feature-box-icon">📊</div><div><div class="feature-box-title">Smart Analytics</div><div class="feature-box-desc">Actionable insights by AI and ML</div></div></div>
+          <div class="feature-box"><div class="feature-box-icon">🤖</div><div><div class="feature-box-title">AI Insights</div><div class="feature-box-desc">Demand forecasting and automation</div></div></div>
+        </div>
+      </div>
+
+      <div class="about-section-card">
+        <h2>🌟 Our Vision</h2>
+        <p>We believe parking should be seamless — not a daily frustration. Our vision is to make smart parking so intuitive that mobility is finally freed from how parking currently traps us. At Smart Parking, we're not just managing parking spaces — we're reimagining the way people move.</p>
+      </div>
+
+      <div class="about-section-card">
+        <h2>💡 Why Choose Smart Parking?</h2>
+        <div class="feature-grid">
+          <div class="feature-box"><div class="feature-box-icon">🔄</div><div><div class="feature-box-title">Smart Technology</div><div class="feature-box-desc">IoT sensors and automation</div></div></div>
+          <div class="feature-box"><div class="feature-box-icon">📦</div><div><div class="feature-box-title">Scalable Demand</div><div class="feature-box-desc">From single lots to city-wide networks</div></div></div>
+          <div class="feature-box"><div class="feature-box-icon">⚡</div><div><div class="feature-box-title">Efficient & Reliable</div><div class="feature-box-desc">99.9% uptime with failover systems</div></div></div>
+          <div class="feature-box"><div class="feature-box-icon">🌱</div><div><div class="feature-box-title">Future-Proof</div><div class="feature-box-desc">Built to support smart city initiatives</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROFILE ══ -->
+    <div id="page-profile" class="module-page">
+      <div class="page-header">
+        <div class="page-title">My Profile</div>
+        <button class="btn btn-secondary btn-sm" onclick="showAuth('login');$('.page-wrapper').hide();$('#page-auth').addClass('active').css('display','block')">🚪 Sign Out</button>
+      </div>
+
+      <div class="card mb-6">
+        <div class="profile-banner">
+          <div class="profile-avatar">RO</div>
+        </div>
+        <div style="padding:48px 22px 20px;">
+          <div style="font-size:19px;font-weight:700;">Rickson Ortega</div>
+          <div class="text-muted text-sm">ricksonortega@gmail.com</div>
+          <span class="badge badge-success" style="margin-top:8px;">Administrator</span>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-title">👤 Personal Information</span></div>
+          <div class="card-body">
+            <form id="profile-form">
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-control" value="Rickson" /></div>
+                <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-control" value="Ortega" /></div>
+              </div>
+              <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" value="ricksonortega@gmail.com" /></div>
+              <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-control" value="+63 912 345 6789" /></div>
+              <div class="form-group"><label class="form-label">Role</label><select class="form-control"><option selected>Administrator</option><option>Operator</option><option>Viewer</option></select></div>
+              <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">🔒 Change Password</span></div>
+          <div class="card-body">
+            <form onsubmit="event.preventDefault();showToast('Password updated!','success')">
+              <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-control" placeholder="••••••••" /></div>
+              <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-control" placeholder="Min 8 characters" /></div>
+              <div class="form-group"><label class="form-label">Confirm New Password</label><input type="password" class="form-control" placeholder="Repeat new password" /></div>
+              <button type="submit" class="btn btn-primary">🔐 Update Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LIVE OVERVIEW ══ -->
+    <div id="page-live" class="module-page">
+      <div class="page-header">
+        <div><div class="page-title">Live Overview</div><div class="page-subtitle">Real-time parking status across all lots</div></div>
+        <span class="live-badge">Live Feed Active</span>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon red">🚗</div><div><div class="stat-value">163</div><div class="stat-label">Occupied Now</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">87</div><div class="stat-label">Available</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">📅</div><div><div class="stat-value">34</div><div class="stat-label">Reserved</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">🏢</div><div><div class="stat-value">4</div><div class="stat-label">Active Lots</div></div></div>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-title">🗺️ Slot Grid — Lot A</span>
+            <select class="form-control" style="width:auto;padding:5px 10px;font-size:12px;"><option>Lot A</option><option>Lot B</option><option>Lot C</option><option>Lot D</option></select>
+          </div>
+          <div class="card-body">
+            <div class="flex gap-2 mb-4" style="font-size:12px;">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--success-bg);border:1px solid #86efac;margin-right:4px;"></span>Available</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--danger-bg);border:1px solid #fca5a5;margin-right:4px;"></span>Occupied</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--warning-bg);border:1px solid #fcd34d;margin-right:4px;"></span>Reserved</span>
+            </div>
+            <div class="slot-grid">
+              <div class="slot occupied">A1<div class="slot-sub">ABC-1234</div></div>
+              <div class="slot available">A2<div class="slot-sub">Free</div></div>
+              <div class="slot occupied">A3<div class="slot-sub">XYZ-5678</div></div>
+              <div class="slot reserved">A4<div class="slot-sub">Reserved</div></div>
+              <div class="slot available">A5<div class="slot-sub">Free</div></div>
+              <div class="slot occupied">A6<div class="slot-sub">DEF-9012</div></div>
+              <div class="slot available">A7<div class="slot-sub">Free</div></div>
+              <div class="slot occupied">A8<div class="slot-sub">GHI-3456</div></div>
+              <div class="slot available">A9<div class="slot-sub">Free</div></div>
+              <div class="slot reserved">A10<div class="slot-sub">Reserved</div></div>
+              <div class="slot occupied">A11<div class="slot-sub">JKL-7890</div></div>
+              <div class="slot available">A12<div class="slot-sub">Free</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">📊 All Lots Status</span><span class="live-badge">LIVE</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot A — Main (72/100)</span><span class="text-danger fw-600">72%</span></div><div class="occ-bar"><div class="occ-fill" data-pct="72" style="width:72%;background:var(--danger)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot B — Annex (45/80)</span><span class="text-warning fw-600">56%</span></div><div class="occ-bar"><div class="occ-fill" data-pct="56" style="width:56%;background:var(--warning)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot C — Rooftop (28/60)</span><span class="text-success fw-600">47%</span></div><div class="occ-bar"><div class="occ-fill" data-pct="47" style="width:47%;background:var(--success)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot D — Underground (18/44)</span><span class="text-success fw-600">41%</span></div><div class="occ-bar"><div class="occ-fill" data-pct="41" style="width:41%;background:var(--success)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PARKING LOGS ══ -->
+    <div id="page-parking-logs" class="module-page">
+      <div class="page-header">
+        <div><div class="page-title">Parking Logs</div><div class="page-subtitle">All vehicle entry and exit records</div></div>
+        <div class="flex gap-2">
+          <div class="search-bar" style="width:200px;"><span style="color:var(--text-muted);font-size:13px;">🔍</span><input type="text" placeholder="Search plate, lot..." id="logs-search" /></div>
+          <button class="btn btn-secondary btn-sm">📥 Export</button>
+          <button class="btn btn-primary btn-sm" data-modal="new-reservation">+ New Entry</button>
+        </div>
+      </div>
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card"><div class="stat-icon red">📋</div><div><div class="stat-value">248</div><div class="stat-label">Today's Logs</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">205</div><div class="stat-label">Checked Out</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">🚗</div><div><div class="stat-value">43</div><div class="stat-label">Still Parked</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">💰</div><div><div class="stat-value">₱12,840</div><div class="stat-label">Total Revenue</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">📋 All Records</span>
+          <div class="flex gap-2">
+            <select class="form-control" style="width:auto;padding:5px 10px;font-size:12px;"><option>All Lots</option><option>Lot A</option><option>Lot B</option><option>Lot C</option></select>
+            <input type="date" class="form-control" style="width:auto;padding:5px 10px;font-size:12px;" />
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table id="logs-table">
+            <thead><tr><th>Log ID</th><th>Plate No.</th><th>Lot</th><th>Slot</th><th>Time In</th><th>Time Out</th><th>Duration</th><th>Fee</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>#LOG-0248</strong></td><td>ABC 1234</td><td>Lot A</td><td>A-12</td><td>08:32 AM</td><td>10:45 AM</td><td>2h 13m</td><td>₱66</td><td><span class="badge badge-muted">Done</span></td></tr>
+              <tr><td><strong>#LOG-0247</strong></td><td>XYZ 5678</td><td>Lot B</td><td>B-05</td><td>09:15 AM</td><td>—</td><td>Active</td><td>—</td><td><span class="badge badge-success">Parked</span></td></tr>
+              <tr><td><strong>#LOG-0246</strong></td><td>DEF 9012</td><td>Lot A</td><td>A-07</td><td>10:00 AM</td><td>12:30 PM</td><td>2h 30m</td><td>₱75</td><td><span class="badge badge-muted">Done</span></td></tr>
+              <tr><td><strong>#LOG-0245</strong></td><td>GHI 3456</td><td>Lot C</td><td>C-22</td><td>11:05 AM</td><td>—</td><td>Active</td><td>—</td><td><span class="badge badge-success">Parked</span></td></tr>
+              <tr><td><strong>#LOG-0244</strong></td><td>JKL 7890</td><td>Lot B</td><td>B-18</td><td>07:30 AM</td><td>11:00 AM</td><td>3h 30m</td><td>₱87.50</td><td><span class="badge badge-muted">Done</span></td></tr>
+              <tr><td><strong>#LOG-0243</strong></td><td>MNO 1357</td><td>Lot D</td><td>D-03</td><td>06:00 AM</td><td>08:45 AM</td><td>2h 45m</td><td>₱96.25</td><td><span class="badge badge-muted">Done</span></td></tr>
+              <tr><td><strong>#LOG-0242</strong></td><td>PQR 2468</td><td>Lot A</td><td>A-33</td><td>12:00 PM</td><td>—</td><td>Active</td><td>—</td><td><span class="badge badge-warning">Reserved</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYSIS ══ -->
+    <div id="page-analysis" class="module-page">
+      <div class="page-header">
+        <div><div class="page-title">Previous Analysis</div><div class="page-subtitle">Historical data and performance reports</div></div>
+        <div class="flex gap-2">
+          <select class="form-control" style="width:auto;padding:8px 12px;font-size:13px;"><option>February 2026</option><option>January 2026</option><option>December 2025</option></select>
+          <button class="btn btn-primary btn-sm">📥 Export PDF</button>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon red">🚗</div><div><div class="stat-value">6,240</div><div class="stat-label">Monthly Vehicles</div><div class="stat-change up">↑ 15%</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">💰</div><div><div class="stat-value">₱312K</div><div class="stat-label">Monthly Revenue</div><div class="stat-change up">↑ 8%</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">⏱️</div><div><div class="stat-value">2.4h</div><div class="stat-label">Avg. Duration</div><div class="stat-change down">↓ 5 min</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">📅</div><div><div class="stat-value">1,840</div><div class="stat-label">Reservations</div><div class="stat-change up">↑ 22%</div></div></div>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-title">📊 Monthly Traffic</span></div>
+          <div class="card-body">
+            <div class="bar-chart">
+              <div class="bar-wrap"><div class="bar" data-h="55" style="height:55%"></div><div class="bar-lbl">Jan</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="72" style="height:72%;background:var(--accent)"></div><div class="bar-lbl">Feb</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="45" style="height:45%"></div><div class="bar-lbl">Mar</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="80" style="height:80%;background:#16a34a"></div><div class="bar-lbl">Apr</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="65" style="height:65%"></div><div class="bar-lbl">May</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="90" style="height:90%;background:#d97706"></div><div class="bar-lbl">Jun</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="78" style="height:78%"></div><div class="bar-lbl">Jul</div></div>
+              <div class="bar-wrap"><div class="bar" data-h="62" style="height:62%;background:var(--accent)"></div><div class="bar-lbl">Aug</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">🏆 Revenue by Lot</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot A — Main</span><span class="text-success fw-600">₱142,500</span></div><div class="occ-bar"><div class="occ-fill" style="width:72%;background:var(--primary)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot B — Annex</span><span class="text-success fw-600">₱93,750</span></div><div class="occ-bar"><div class="occ-fill" style="width:56%;background:var(--accent)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot C — Rooftop</span><span class="text-success fw-600">₱48,000</span></div><div class="occ-bar"><div class="occ-fill" style="width:38%;background:var(--warning)"></div></div></div>
+            <div><div class="flex-between mb-4" style="font-size:13px;"><span class="fw-600">Lot D — Underground</span><span class="text-success fw-600">₱28,750</span></div><div class="occ-bar"><div class="occ-fill" style="width:24%;background:var(--success)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end page-content -->
+
+  <!-- FOOTER -->
+  <div class="footer-strip">
+    <div>© 2026 ParkSmart Corp. All rights reserved.</div>
+    <div style="display:flex;gap:16px;">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms &amp; Service</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ════════════════════════════════════════
+     MODALS
+════════════════════════════════════════ -->
+
+<!-- New Reservation -->
+<div id="modal-new-reservation" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>📅 New Reservation</h3><button class="btn btn-secondary btn-sm btn-icon modal-close">✕</button></div>
+    <div class="modal-body">
+      <form id="reservation-form">
+        <div class="form-group"><label class="form-label">Plate Number *</label><input id="res-plate" type="text" class="form-control" placeholder="e.g. ABC 1234" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Parking Lot *</label>
+            <select id="res-lot" class="form-control"><option value="">Select lot...</option><option>Lot A — Main</option><option>Lot B — Annex</option><option>Lot C — Rooftop</option><option>Lot D — Underground</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Slot Number *</label>
+            <select id="res-slot" class="form-control"><option value="">Select slot...</option><option>A-02</option><option>A-05</option><option>A-09</option><option>B-03</option><option>B-07</option><option>B-14</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date *</label><input id="res-date" type="date" class="form-control" /></div>
+          <div class="form-group"><label class="form-label">Time</label><input type="time" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><input type="text" class="form-control" placeholder="Optional..." /></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary modal-close">Cancel</button>
+      <button class="btn btn-primary" onclick="$('#reservation-form').submit()">✅ Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Reservation -->
+<div id="modal-edit-reservation" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>✏️ Edit Reservation</h3><button class="btn btn-secondary btn-sm btn-icon modal-close">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Plate Number</label><input type="text" class="form-control" value="ABC 1234" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Lot</label><select class="form-control"><option selected>Lot A — Main</option><option>Lot B — Annex</option></select></div>
+        <div class="form-group"><label class="form-label">Slot</label><select class="form-control"><option selected>A-04</option><option>A-07</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-control" value="2026-02-28" /></div>
+        <div class="form-group"><label class="form-label">Time</label><input type="time" class="form-control" value="09:00" /></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary modal-close">Cancel</button>
+      <button class="btn btn-primary" onclick="showToast('Reservation updated!','success');$('#modal-edit-reservation').removeClass('open')">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Lot Modal -->
+<div id="modal-edit-lot" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>✏️ Edit Parking Lot</h3><button class="btn btn-secondary btn-sm btn-icon modal-close">✕</button></div>
+    <div class="modal-body">
+      <form id="edit-lot-form">
+        <div class="form-group"><label class="form-label">Lot Name</label><input id="edit-lot-name" type="text" class="form-control" /></div>
+        <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-control" placeholder="Full address" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Total Slots</label><input type="number" class="form-control" value="100" /></div>
+          <div class="form-group"><label class="form-label">Rate/hr (₱)</label><input type="number" class="form-control" value="30" /></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vehicle Types</label>
+          <div class="flex gap-3" style="margin-top:6px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" checked /> 🚗 Car</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" /> 🚛 Truck</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" checked /> 🏍️ Motorcycle</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" /> 🚌 Van</label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary modal-close">Cancel</button>
+      <button class="btn btn-primary" onclick="$('#edit-lot-form').submit()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Hours Modal — green header matching screenshot -->
+<div id="modal-add-hours" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-green-header">
+      <h3>🕐 Add Hours</h3>
+      <button class="btn-close-white modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="add-hours-form">
+        <p class="text-muted text-sm mb-4">Which days does this parking lot operate? Set the opening and closing time for each day.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" checked /> Monday</label>
+            <input type="time" class="form-control" value="06:00" />
+            <input type="time" class="form-control" value="22:00" />
+          </div>
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" checked /> Tuesday</label>
+            <input type="time" class="form-control" value="06:00" />
+            <input type="time" class="form-control" value="22:00" />
+          </div>
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" checked /> Wednesday</label>
+            <input type="time" class="form-control" value="06:00" />
+            <input type="time" class="form-control" value="22:00" />
+          </div>
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" checked /> Thursday</label>
+            <input type="time" class="form-control" value="06:00" />
+            <input type="time" class="form-control" value="22:00" />
+          </div>
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" checked /> Friday</label>
+            <input type="time" class="form-control" value="06:00" />
+            <input type="time" class="form-control" value="23:00" />
+          </div>
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" checked /> Saturday</label>
+            <input type="time" class="form-control" value="07:00" />
+            <input type="time" class="form-control" value="23:00" />
+          </div>
+          <div class="form-row-3" style="align-items:center;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" /> Sunday</label>
+            <input type="time" class="form-control" value="08:00" disabled />
+            <input type="time" class="form-control" value="20:00" disabled />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;font-size:13px;">
+          <div class="form-group" style="flex:1;margin:0;">
+            <label class="form-label">Parking Lot Name</label>
+            <input type="text" class="form-control" placeholder="Lot A — Main" />
+          </div>
+          <div class="form-group" style="flex:1;margin:0;">
+            <label class="form-label">Fee per hour (₱)</label>
+            <input type="number" class="form-control" placeholder="30" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary modal-close">Cancel</button>
+      <button class="btn btn-primary" onclick="$('#add-hours-form').submit()">💾 Save Hours</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Lot Modal -->
+<div id="modal-add-lot" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>➕ Add New Parking Lot</h3><button class="btn btn-secondary btn-sm btn-icon modal-close">✕</button></div>
+    <div class="modal-body">
+      <form onsubmit="event.preventDefault();showToast('Parking lot added!','success');$(this).closest('.modal-overlay').removeClass('open')">
+        <div class="form-group"><label class="form-label">Lot Name *</label><input type="text" class="form-control" placeholder="e.g. Lot E — Overflow" /></div>
+        <div class="form-group"><label class="form-label">Address *</label><input type="text" class="form-control" placeholder="Full address" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Total Slots *</label><input type="number" class="form-control" placeholder="50" /></div>
+          <div class="form-group"><label class="form-label">Rate/hr (₱) *</label><input type="number" class="form-control" placeholder="25" /></div>
+        </div>
+        <div class="modal-footer" style="padding:0;border:0;margin-top:4px;">
+          <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">✅ Add Lot</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
